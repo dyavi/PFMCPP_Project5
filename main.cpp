@@ -22,29 +22,29 @@ write 3 UDTs below that EACH have:
         5 member variables  
         3 member functions
         constructors and loops.
-        
+
  2) Define your implementations of all functions OUTSIDE of the class. 
  NO IN-CLASS IMPLEMENTATION ALLOWED
  3) add destructors to all of your UDTs
         make the destructors do something like print out the name of the class.
- 
+
  4) add 2 new UDTs that use only the types you copied above as member variables.
- 
+
  5) Add destructors to these 2 new types that do something.  
         maybe print out the name of the class being destructed, or call a member function of one of the members.  be creative
- 
+
  6) add 2 member functions to each of these 2 new types.
        These member functions should make use of the member variables. 
        Maybe interact with their properties or call their member functions.
        The purpose is to demonstrate that you know how to use a class's member variables and member functions when it is a member of another class.
- 
+
  7) use at least 2 instances of each of your UDTs in main. 
        - call every member function of your UDTs to make sure they work as expected and don't produce warnings.
        - add some std::cout statements in main() that use your UDT's member variables.
        you have 5 UDTs and 2 nested UDTs, so there should be at minimum 14 UDTs declared in main(), as well as 14 * 3 function calls happening.
- 
+
  8) After you finish, click the [run] button.  Clear up any errors or warnings as best you can.
- 
+
 If you need inspiration for what to write, take a look at previously approved student projects in the Slack Workspace channel for this project part.
 
  you can resolve any [-Wdeprecated] warnings by adding -Wno-deprecated to list of compiler arguments in the .replit file. all of the "-Wno" in that file are compiler arguments.
@@ -77,7 +77,7 @@ If you need inspiration for what to write, take a look at previously approved st
 /*
  MAKE SURE YOU ARE NOT ON THE MASTER BRANCH
  Commit your changes by clicking on the Source Control panel on the left, entering a message, and click [Commit and push].
- 
+
  If you didn't already: 
     Make a pull request after you make your first commit
     pin the pull request link and this repl.it link to our DM thread in a single message.
@@ -202,7 +202,7 @@ void Book::Chapter::reviewChapter(bool status)
 
     // this is just to use the for/while loop, as per the instructions
     char previousGrade = chapterGrade;
-    for (int i = 0; i < 9; i++) 
+    for (int i = 0; i < 9; ++i) 
     {
         if (i % 5 == 0)
         {
@@ -308,7 +308,7 @@ void Flight::boardPassenger(int count)
     // for-while loop instructions
     for (int i = 0; i < count; ++i)
     {
-        numberOfPassengers++;
+        ++numberOfPassengers;
         std::cout << "\t\t-Passenger " << (i + 1) << " boarded.\n";
     }
 }
@@ -348,7 +348,7 @@ void Flight::PassengerSeat::requestExtraLegroom(bool request)
     while (malfunctions != count) 
     {
         hasExtraLegroom = ! hasExtraLegroom;
-        malfunctions++;
+        ++malfunctions;
     }
     // eventually, do the right thing
     hasExtraLegroom = request; 
@@ -404,7 +404,7 @@ void Airport::addRunway(int count)
 {
     for (int i = 0; i < count; ++i)
     {
-        totalRunways++;
+        ++totalRunways;
         std::cout << "The `" << code << "` Airport just added a new runway! Total runways as of date: " << totalRunways << "\n";
     }
 
