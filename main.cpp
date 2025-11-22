@@ -5,10 +5,10 @@ Project 5: Part 2 / 4
 Create a branch named Part2
 
  The 'this' keyword
- 
+
  The purpose of this project part is to show you how accessing member variables of objects INSIDE member functions is very similar to accessing member variables of objects OUTSIDE of member functions, via the 'this' keyword and arrow (->) operator and via the '.' operator.
  This project part will break the D.R.Y. rule, but that is fine for the purpose of this project part.
- 
+
  Instructions:
  1) if you don't have any std::cout statements in main() that access member variables of your U.D.Ts
          write some.
@@ -19,10 +19,10 @@ Create a branch named Part2
     b) be explicit with your use of 'this->' in those member functions so we see how you're accessing/calling those member variables and functions *inside*
     c) call that member function AFTER your std::cout statement in main.
     NOTE: if your member functions being called in main() use std::cout statements, you don't need to create duplicates of these functions.  you only need to create member functions for the std::cout statements that exist in main().
-        
+
  3) you should see 2 (almost) identical messages in the program output for each member function you add:
     one for the std::cout line, and one for the member function's output
- 
+
  4) After you finish, click the [run] button.  Clear up any errors or warnings as best you can.
  */
 
@@ -37,32 +37,32 @@ namespace Example
     {
         MyFoo();
         ~MyFoo();
-        
+
         void printDetailedMemberInfo();
-        
+
         int returnValue() { return 3; }
         float memberVariable = 3.14f;
     };
 
     MyFoo::MyFoo() { std::cout << "creating MyFoo" << std::endl; }
     MyFoo::~MyFoo() { std::cout << "destroying MyFoo" << std::endl; }
-        
-	// 2a) the member function whose function body is almost identical to the std::cout statement in main.
+
+    // 2a) the member function whose function body is almost identical to the std::cout statement in main.
     //Remember to NAME FUNCTIONS WHAT THEY DO.
     void MyFoo::printDetailedMemberInfo() //function name contains a verb!!!
     { 
         // 2b) explicitly using 'this' inside this member function.
         std::cout << "MyFoo returnValue(): " << this->returnValue() << " and MyFoo memberVariable: " << this->memberVariable << std::endl; 
     }  
-    
+
     int main()
     {
         //an instance of the User-Defined Type named mf
         MyFoo mf;
-        
+
         // 1) a std::cout statement that uses mf's member variables
         std::cout << "mf returnValue(): " << mf.returnValue() << " and mf memberVariable: " << mf.memberVariable << std::endl; 
-        
+
         // 2c) calling mf's member function.  the member function's body is almost identical to the cout statement above.
         mf.printDetailedMemberInfo();
         return 0;
@@ -133,6 +133,8 @@ struct Book
         void updateSummary(std::string newSummary);
 
         void gradeChapter(char grade = 'A');
+
+        void printDetailedMemberInfo();
 
         Chapter();
 
@@ -233,6 +235,14 @@ void Book::Chapter::gradeChapter(char grade)
     chapterGrade = grade;
 }
 
+void Book::Chapter::printDetailedMemberInfo()
+{
+    std::cout << "Version `INSIDE`\n"
+              << "Book::Chapter() summary: " << this->summary
+              << "\nEnjoyable: " << (this->isEnjoyable ? "Yes" : "No")
+              << "\nGrade (final/in the end): " << this->chapterGrade << "\n\n";
+}
+
 
 /*
  UDT 2:
@@ -278,6 +288,8 @@ struct Flight
         void requestExtraLegroom(bool request = false);
 
         void releaseSeat();
+
+        void printDetailedMemberInfo();
 
         PassengerSeat();
 
@@ -360,6 +372,18 @@ void Flight::PassengerSeat::releaseSeat()
     passengerName = "";
     passengerID = "";
     hasExtraLegroom = false;
+}
+
+void Flight::PassengerSeat::printDetailedMemberInfo() 
+{
+    std::cout << "Version `INSIDE`\n"
+              << "Flight::PassengerSeat() assigned to: " << this->passengerName
+              << " (ID: " << this->passengerID << ")"
+              << ", seat number: " << this->seatNumber
+              << ", extra legroom: " << (this->hasExtraLegroom ? "Yes" : "No")
+              << "\n(in case seat has been released, print to confirm passenger's name is null): \t"
+              << this->passengerName
+              << "\n\n";
 }
 
 /*
@@ -507,6 +531,8 @@ struct Traveler
 
     void finishChapter(char grade, bool enjoyed);
 
+    void printDetailedMemberInfo();
+
     Traveler();
 
     ~Traveler();
@@ -563,16 +589,18 @@ void Traveler::finishChapter(char grade, bool enjoyed)
 }
 
 
-/*
- MAKE SURE YOU ARE NOT ON THE MASTER BRANCH
- Commit your changes by clicking on the Source Control panel on the left, entering a message, and click [Commit and push].
+void Traveler::printDetailedMemberInfo()
+{
+    std::cout << "Version `INSIDE`\n";
+    std::cout << "Traveler()'s favorite book: " << this->favoriteBook.title 
+              << " by " << this->favoriteBook.author << "\n";
+    std::cout << "Traveler()'s flight: " << this->bookedFlight.flightNumber 
+              << " (" << this->bookedFlight.airline << ") from " 
+              << this->departureAirport.code << " to " 
+              << this->arrivalAirport.code << "\n\n";
+}
 
- If you didn't already: 
-    Make a pull request after you make your first commit
-    pin the pull request link and this repl.it link to our DM thread in a single message.
- send me a DM to review your pull request when the project is ready for review.
- Wait for my code review.
- */
+
 
 int main()
 {
@@ -625,9 +653,12 @@ int main()
     chapter1.gradeChapter('B');
     chapter1.reviewChapter(true);
 
-    std::cout << "Chapter1 summary: " << chapter1.summary
+    std::cout << "Version `OUTSIDE`\n"
+              << "Chapter1 summary: " << chapter1.summary
               << "\nEnjoyable: " << (chapter1.isEnjoyable ? "Yes" : "No")
               << "\nGrade (final/in the end): " << chapter1.chapterGrade << "\n\n";
+
+    chapter1.printDetailedMemberInfo();
 
     std::cout << "\n********************************\nExample 4. `Book::Chapter` Instance #2\n********************************\n" ;
 
@@ -640,9 +671,12 @@ int main()
     chapter2.gradeChapter('C');
     chapter2.reviewChapter(true);
 
-    std::cout << "Chapter2 summary: " << chapter2.summary
+    std::cout << "Version `OUTSIDE`\n"
+              << "Chapter2 summary: " << chapter2.summary
               << "\nEnjoyable: " << (chapter2.isEnjoyable ? "Yes" : "No")
               << "\nGrade (final/in the end): " << chapter2.chapterGrade << "\n\n";
+
+    chapter2.printDetailedMemberInfo();
 
     std::cout << "=================================== Finished testing UDT1: `Book` and its nested UDT: `Chapter` =================================== \n\n";
 
@@ -685,24 +719,33 @@ int main()
     seat1.seatClass  = 'E'; // Economy
     seat1.assignPassenger("Mr. Johnson", "ALC12345");
 
-    std::cout << "Seat1 originally assigned to: " << seat1.passengerName
+    std::cout << "Version `OUTSIDE`\n"
+              << "Seat1 originally assigned to: " << seat1.passengerName
               << " (ID: " << seat1.passengerID << ")"
               << ", seat number: " << seat1.seatNumber
               << ", extra legroom: " << (seat1.hasExtraLegroom ? "Yes" : "No")
               << "\n";
+
+    seat1.printDetailedMemberInfo();
 
     seat1.requestExtraLegroom(true);
 
-    std::cout << "After 30 mins this passenger requested extra legroom: " << seat1.passengerName
+    std::cout << "Version `OUTSIDE`\n"
+              << "After 30 mins this passenger requested extra legroom: " << seat1.passengerName
               << " (ID: " << seat1.passengerID << ")"
               << ", seat number: " << seat1.seatNumber
               << ", extra legroom: " << (seat1.hasExtraLegroom ? "Yes" : "No")
               << "\n";
 
+    seat1.printDetailedMemberInfo();
+
     seat1.releaseSeat(); 
 
-    std::cout << "Seat1 after release, passenger name: \"" 
+    std::cout << "Version `OUTSIDE`\n"
+              << "Seat1 after release, passenger name: \"" 
               << seat1.passengerName << "\"\n\n";
+
+    seat1.printDetailedMemberInfo();
 
     std::cout << "\n********************************\nExample 8. `Flight::PassengerSeat` Instance #2\n********************************\n" ;
 
@@ -714,17 +757,23 @@ int main()
     seat2.assignPassenger("Esther Smith", "BOB98765");
     seat2.requestExtraLegroom(true);
 
-    std::cout << "Seat2 assigned to: " << seat2.passengerName
+    std::cout << "Version `OUTSIDE`\n"
+              << "Seat2 assigned to: " << seat2.passengerName
               << " (ID: " << seat2.passengerID << ")"
               << ", seat number: " << seat2.seatNumber
               << ", seat class: " << seat2.seatClass
               << ", extra legroom: " << (seat2.hasExtraLegroom ? "Yes" : "No")
               << "\n";
 
+    seat2.printDetailedMemberInfo();
+
     seat2.releaseSeat();
 
-    std::cout << "Seat2 after release, passenger name: \"" 
+    std::cout << "Version `OUTSIDE`\n"
+              << "Seat2 after release, passenger name: \"" 
               << seat2.passengerName << "\"\n\n";
+
+    seat2.printDetailedMemberInfo();
 
 
     std::cout << "=================================== Finished testing UDT2: `Flight` and its nested UDT: `PassengerSeat` ===================================\n";
@@ -835,12 +884,15 @@ int main()
     traveler1.checkInAndshowItinerary("Chuck Norris", "HWC176545");
     traveler1.finishChapter('A', true);
 
+    std::cout << "Version `OUTSIDE`\n";
     std::cout << "Traveler1's favorite book: " << traveler1.favoriteBook.title 
               << " by " << traveler1.favoriteBook.author << "\n";
     std::cout << "Traveler1's flight: " << traveler1.bookedFlight.flightNumber 
               << " (" << traveler1.bookedFlight.airline << ") from " 
               << traveler1.departureAirport.code << " to " 
               << traveler1.arrivalAirport.code << "\n\n";
+
+    traveler1.printDetailedMemberInfo();
 
 
     std::cout << "\n********************************\nExample 14. `Airport` Instance #2\n********************************\n" ;
@@ -872,6 +924,8 @@ int main()
               << " (" << traveler2.bookedFlight.airline << ") from " 
               << traveler2.departureAirport.code << " to " 
               << traveler2.arrivalAirport.code << "\n\n";
+
+    traveler2.printDetailedMemberInfo();
 
     std::cout << "\n=================================== Finished testing UDT5: `Traveler` ===================================\n";
 
