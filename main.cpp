@@ -7,16 +7,16 @@ Create a branch named Part3
  the 'new' keyword
 
  1) add #include "LeakedObjectDetector.h" to main
- 
+
  2) Add 'JUCE_LEAK_DETECTOR(OwnerClass)' at the end of your UDTs.
- 
+
  3) write the name of your class where it says "OwnerClass"
- 
+
  4) write wrapper classes for each type similar to how it was shown in the video
- 
+
  5) update main() 
       replace your objects with your wrapper classes, which have your UDTs as pointer member variables.
-      
+
     This means if you had something like the following in your main() previously: 
 */
 #if false
@@ -25,7 +25,7 @@ Create a branch named Part3
  #endif
  /*
     you would update that to use your wrappers:
-    
+
  */
 
 #if false
@@ -69,7 +69,7 @@ void Axe::aConstMemberFunction() const { }
 #endif
 /*
  8) After you finish, click the [run] button.  Clear up any errors or warnings as best you can.
- 
+
  see here for an example: https://repl.it/@matkatmusic/ch3p04example
 
  Clear any warnings about exit-time-destructors.
@@ -91,6 +91,7 @@ void Axe::aConstMemberFunction() const { }
  */
 
 #include <iostream>
+#include "LeakedObjectDetector.h"
 
 
 /*
@@ -113,7 +114,7 @@ struct Book
 
     void updateEdition(int newEdition);
 
-    void showBookInfo();
+    void showBookInfo() const;
 
     Book();
 
@@ -134,17 +135,18 @@ struct Book
 
         void reviewChapter(bool status);
 
-        void updateSummary(std::string newSummary);
+        void updateSummary(const std::string& newSummary);
 
         void gradeChapter(char grade = 'A');
 
-        void printDetailedMemberInfo();
+        void printDetailedMemberInfo() const;
 
         Chapter();
 
         ~Chapter();
     };
 
+    JUCE_LEAK_DETECTOR(Book)
 };
 
 Book::Book() : 
@@ -180,7 +182,7 @@ void Book::updateEdition(int newEdition)
     edition = newEdition;
 }
 
-void Book::showBookInfo() 
+void Book::showBookInfo() const
 {
     std::cout << "```\n";
     std::cout << "Book: " << Book::title 
@@ -229,7 +231,7 @@ void Book::Chapter::reviewChapter(bool status)
         chapterGrade = 'O';
 }
 
-void Book::Chapter::updateSummary(std::string newSummary)
+void Book::Chapter::updateSummary(const std::string& newSummary)
 {
     summary = newSummary;
 }
@@ -239,13 +241,22 @@ void Book::Chapter::gradeChapter(char grade)
     chapterGrade = grade;
 }
 
-void Book::Chapter::printDetailedMemberInfo()
+void Book::Chapter::printDetailedMemberInfo() const
 {
     std::cout << "Version `INSIDE`\n"
               << "Book::Chapter() summary: " << this->summary
               << "\nEnjoyable: " << (this->isEnjoyable ? "Yes" : "No")
               << "\nGrade (final/in the end): " << this->chapterGrade << "\n\n";
 }
+
+
+// BookWrapper class definition per instruction #4 of project 5 part 3.
+struct BookWrapper
+{
+    BookWrapper(Book* _book) : bookPtr(_book) { }
+    ~BookWrapper() { delete bookPtr; }
+    Book* bookPtr = nullptr;
+};
 
 
 /*
@@ -267,7 +278,8 @@ struct Flight
 
     void updateDuration(float newDuration);
 
-    void showFlightInfo();
+    void showFlightInfo() const;
+
     void boardPassenger(int count = 1);
 
 
@@ -287,18 +299,20 @@ struct Flight
 
         std::string passengerID;
 
-        void assignPassenger(std::string name, std::string id);
+        void assignPassenger(const std::string& name, const std::string& id);
 
         void requestExtraLegroom(bool request = false);
 
         void releaseSeat();
 
-        void printDetailedMemberInfo();
+        void printDetailedMemberInfo() const;
 
         PassengerSeat();
 
         ~PassengerSeat();
     };
+
+    JUCE_LEAK_DETECTOR(Flight)
 };
 
 //  UDT2: Flight implementation 
@@ -330,7 +344,7 @@ void Flight::boardPassenger(int count)
     }
 }
 
-void Flight::showFlightInfo() 
+void Flight::showFlightInfo() const
 {
     std::cout << "Flight: " << flightNumber
               << "\nFrom: " << origin
@@ -351,7 +365,7 @@ Flight::PassengerSeat::~PassengerSeat()
     std::cout << "Deallocation of UDT `PassengerSeat` that is nested inside of `Flight`\n"; 
 }
 
-void Flight::PassengerSeat::assignPassenger(std::string name, std::string id) 
+void Flight::PassengerSeat::assignPassenger(const std::string& name, const std::string& id) 
 {
     passengerName = name;
     passengerID = id;
@@ -378,7 +392,7 @@ void Flight::PassengerSeat::releaseSeat()
     hasExtraLegroom = false;
 }
 
-void Flight::PassengerSeat::printDetailedMemberInfo() 
+void Flight::PassengerSeat::printDetailedMemberInfo() const 
 {
     std::cout << "Version `INSIDE`\n"
               << "Flight::PassengerSeat() assigned to: " << this->passengerName
@@ -389,6 +403,15 @@ void Flight::PassengerSeat::printDetailedMemberInfo()
               << this->passengerName
               << "\n\n";
 }
+
+// FlightWrapper class definition per instruction #4 of project 5 part 3. 
+struct FlightWrapper
+{
+    FlightWrapper(Flight* _flight) : flightPtr(_flight) { }
+    ~FlightWrapper() { delete flightPtr; }
+    Flight* flightPtr = nullptr;
+};
+
 
 /*
  UDT 3:
@@ -408,13 +431,15 @@ struct Airport
 
     void addRunway(int count = 1);
 
-    void showAirportInfo();
+    void showAirportInfo() const;
 
     void updateAnnualPassengers(double newCount = 0.0);
 
     Airport();
 
     ~Airport();
+
+    JUCE_LEAK_DETECTOR(Airport)
 };
 
 // UDT3: Airport implementation 
@@ -444,7 +469,7 @@ void Airport::updateAnnualPassengers(double newCount)
     annualPassengers = newCount; 
 }
 
-void Airport::showAirportInfo() 
+void Airport::showAirportInfo() const
 {
     std::cout << "Airport (code): " << code
               << "\nCity: " << city
@@ -452,6 +477,14 @@ void Airport::showAirportInfo()
               << "\nAnnual Passengers: " << annualPassengers
               << "\nInternational: " << (isInternational ? "Yes" : "No") << "\n";
 }
+
+// AirportWrapper class definition per instruction #4 of project 5 part 3.
+struct AirportWrapper
+{
+    AirportWrapper(Airport* _airport) : airportPtr(_airport) { }
+    ~AirportWrapper() { delete airportPtr; }
+    Airport* airportPtr = nullptr;
+};
 
 
 /*
@@ -466,13 +499,15 @@ struct Airline
 
     Airport destinationAirport;       
 
-    void scheduleRoute(std::string originCode, std::string destCode="NA");
+    void scheduleRoute(const std::string& originCode, const std::string& destCode="NA");
 
-    void showAirlineInfo();
+    void showAirlineInfo() const;
 
     Airline();
 
     ~Airline();
+
+    JUCE_LEAK_DETECTOR(Airline)
 };
 
 // UDT4: Airline implementation 
@@ -488,7 +523,7 @@ Airline::~Airline()
     std::cout << "Deallocation of UDT `Airline`\n";
 }
 
-void Airline::scheduleRoute(std::string originCode, std::string destCode)
+void Airline::scheduleRoute(const std::string& originCode, const std::string& destCode)
 {
     // Set airport codes for origin/destination for simplicity
     originAirport.code = originCode;
@@ -503,7 +538,7 @@ void Airline::scheduleRoute(std::string originCode, std::string destCode)
               << destinationAirport.code << "\n";
 }
 
-void Airline::showAirlineInfo()
+void Airline::showAirlineInfo() const
 {
     std::cout << "\n=== Airline Information ===\n";
     std::cout << "Main flight details:\n";
@@ -516,6 +551,14 @@ void Airline::showAirlineInfo()
     destinationAirport.showAirportInfo();
     std::cout << "===========================\n";
 }
+
+// AirlineWrapper class definition per instruction #4 of project 5 part 3.
+struct AirlineWrapper
+{
+    AirlineWrapper(Airline* _airline) : airlinePtr(_airline) { }
+    ~AirlineWrapper() { delete airlinePtr; }
+    Airline* airlinePtr = nullptr;
+};
 
 
 /*
@@ -531,15 +574,17 @@ struct Traveler
 
     Airport arrivalAirport;           
 
-    void checkInAndshowItinerary(std::string passengerName, std::string passengerID);
+    void checkInAndshowItinerary(const std::string& passengerName, const std::string& passengerID);
 
     void finishChapter(char grade, bool enjoyed);
 
-    void printDetailedMemberInfo();
+    void printDetailedMemberInfo() const;
 
     Traveler();
 
     ~Traveler();
+
+    JUCE_LEAK_DETECTOR(Traveler)
 };
 
 // UDT5: Traveler implementation 
@@ -555,8 +600,9 @@ Traveler::~Traveler()
     std::cout << "Deallocation of UDT `Traveler`\n";
 }
 
-// this should be two separate functions, but I'd like to keep it simple for now as per instructions #6
-void Traveler::checkInAndshowItinerary(std::string passengerName, std::string passengerID)
+// this should be two separate functions, but I'd like to keep it simple for now as per instructions #6 of project 5 part 1
+// also the parameters have been passed by 'const reference' per instruction #7 of project 5 part 3
+void Traveler::checkInAndshowItinerary(const std::string& passengerName, const std::string& passengerID)
 {
     Flight::PassengerSeat tempSeat;
     tempSeat.assignPassenger(passengerName, passengerID);
@@ -593,7 +639,7 @@ void Traveler::finishChapter(char grade, bool enjoyed)
 }
 
 
-void Traveler::printDetailedMemberInfo()
+void Traveler::printDetailedMemberInfo() const
 {
     std::cout << "Version `INSIDE`\n";
     std::cout << "Traveler()'s favorite book: " << this->favoriteBook.title 
@@ -604,6 +650,13 @@ void Traveler::printDetailedMemberInfo()
               << this->arrivalAirport.code << "\n\n";
 }
 
+// TravelerWrapper class definition per instruction #4 of project 5 part 3
+struct TravelerWrapper
+{
+    TravelerWrapper(Traveler* _traveler) : travelerPtr(_traveler) { }
+    ~TravelerWrapper() { delete travelerPtr; }
+    Traveler* travelerPtr = nullptr;
+};
 
 
 int main()
@@ -613,36 +666,36 @@ int main()
 
     std::cout << "\n********************************\nExample 1. `Book` Instance #1\n********************************\n" ;
 
-    Book book1;
+    BookWrapper book1( new Book() );
 
     std::cout << "\nBook1 Info before being updated (price and edition will be updated):\n";
 
-    book1.showBookInfo();
-    book1.updatePrice(29.99f);
-    book1.updateEdition(2);
+    book1.bookPtr->showBookInfo();
+    book1.bookPtr->updatePrice(29.99f);
+    book1.bookPtr->updateEdition(2);
 
     std::cout << "\nBook1 Info after being updated:\n";
 
-    book1.showBookInfo();
+    book1.bookPtr->showBookInfo();
 
     std::cout << "\n********************************\nExample 2. `Book` Instance #2\n********************************\n" ;
 
-    Book book2;
+    BookWrapper book2( new Book() );
 
-    book2.title = "Atomic Habits";
-    book2.author = "James Clear";
-    book2.publicationYear = 2018;
-    book2.price = 18.88f;  
+    book2.bookPtr->title = "Atomic Habits";
+    book2.bookPtr->author = "James Clear";
+    book2.bookPtr->publicationYear = 2018;
+    book2.bookPtr->price = 18.88f;  
 
     std::cout << "\nBook2 Info before being updated (price and edition will be updated):\n";
 
-    book2.showBookInfo();
-    book2.updatePrice(22.50f);
-    book2.updateEdition(2);
+    book2.bookPtr->showBookInfo();
+    book2.bookPtr->updatePrice(22.50f);
+    book2.bookPtr->updateEdition(2);
 
     std::cout << "\nBook2 Info after being updated:\n";
 
-    book2.showBookInfo();
+    book2.bookPtr->showBookInfo();
 
     std::cout << "\n";
 
@@ -689,31 +742,31 @@ int main()
 
     std::cout << "\n********************************\nExample 5. `Flight` Instance #1\n********************************\n" ;
 
-    Flight flight1;
+    FlightWrapper flight1( new Flight() );
 
     // Initialize flight1
-    flight1.flightNumber = "AA101";
-    flight1.airline      = "American Airlines";
-    flight1.origin       = "JFK";
-    flight1.destination  = "LAX";
+    flight1.flightPtr->flightNumber = "AA101";
+    flight1.flightPtr->airline      = "American Airlines";
+    flight1.flightPtr->origin       = "JFK";
+    flight1.flightPtr->destination  = "LAX";
 
     // Call all member functions on flight1
-    flight1.boardPassenger(2);
-    flight1.updateDuration(6.0f);       
-    flight1.showFlightInfo();
+    flight1.flightPtr->boardPassenger(2);
+    flight1.flightPtr->updateDuration(6.0f);       
+    flight1.flightPtr->showFlightInfo();
 
     std::cout << "\n********************************\nExample 6. `Flight` Instance #2\n********************************\n" ;
 
-    Flight flight2;
+    FlightWrapper flight2( new Flight() );
 
-    flight2.flightNumber = "DL220";
-    flight2.airline      = "Delta Air Lines";
-    flight2.origin       = "ATL";
-    flight2.destination  = "SFO";
+    flight2.flightPtr->flightNumber = "DL220";
+    flight2.flightPtr->airline      = "Delta Air Lines";
+    flight2.flightPtr->origin       = "ATL";
+    flight2.flightPtr->destination  = "SFO";
 
-    flight2.boardPassenger(4);
-    flight2.updateDuration(5.0f);
-    flight2.showFlightInfo();
+    flight2.flightPtr->boardPassenger(4);
+    flight2.flightPtr->updateDuration(5.0f);
+    flight2.flightPtr->showFlightInfo();
 
     std::cout << "\n********************************\nExample 7. `Flight::PassengerSeat` Instance #1\n********************************\n" ;
 
@@ -786,37 +839,37 @@ int main()
 
     std::cout << "\n********************************\nExample 9. `Airport` Instance #1\n********************************\n" ;
 
-    Airport airport1;
+    AirportWrapper airport1( new Airport() );
 
     // Initialize airport1: JFK, New York
-    airport1.code = "JFK";
-    airport1.city = "New York";
-    airport1.isInternational = true;
-    airport1.totalRunways = 4;
+    airport1.airportPtr->code = "JFK";
+    airport1.airportPtr->city = "New York";
+    airport1.airportPtr->isInternational = true;
+    airport1.airportPtr->totalRunways = 4;
 
-    airport1.updateAnnualPassengers(75000000.0);
-    airport1.showAirportInfo();   
+    airport1.airportPtr->updateAnnualPassengers(75000000.0);
+    airport1.airportPtr->showAirportInfo();   
 
     std::cout << "After adding one more runaway to the airport...\n";
 
-    airport1.addRunway();         
-    airport1.showAirportInfo(); 
+    airport1.airportPtr->addRunway();         
+    airport1.airportPtr->showAirportInfo(); 
 
     std::cout << "\n********************************\nExample 10. `Airport` Instance #2\n********************************\n" ;
 
-    Airport airport2;
-    airport2.code = "LAX";
+    AirportWrapper airport2( new Airport() );
+    airport2.airportPtr->code = "LAX";
 
-    airport2.city = "Los Angeles";
-    airport2.isInternational = true;
+    airport2.airportPtr->city = "Los Angeles";
+    airport2.airportPtr->isInternational = true;
 
-    airport2.updateAnnualPassengers(88900000.0);
-    airport2.showAirportInfo();
-    airport2.addRunway(2);
+    airport2.airportPtr->updateAnnualPassengers(88900000.0);
+    airport2.airportPtr->showAirportInfo();
+    airport2.airportPtr->addRunway(2);
 
     std::cout << "After adding two more runaway to the airport...\n";
 
-    airport2.showAirportInfo();
+    airport2.airportPtr->showAirportInfo();
 
     std::cout << "\n=================================== Finished testing UDT3: `Airport ` (no nested UDT here) ===================================\n";
 
@@ -824,42 +877,42 @@ int main()
 
     std::cout << "\n********************************\nExample 11. `Airport` Instance #1\n********************************\n" ;
 
-    Airline airline1;
+    AirlineWrapper airline1( new Airline() );
 
-    airline1.mainFlight.flightNumber = "AA101";
-    airline1.mainFlight.airline      = "American Airlines";
-    airline1.mainFlight.boardPassenger(6);
+    airline1.airlinePtr->mainFlight.flightNumber = "AA101";
+    airline1.airlinePtr->mainFlight.airline      = "American Airlines";
+    airline1.airlinePtr->mainFlight.boardPassenger(6);
 
-    airline1.originAirport.code      = "JFK";
-    airline1.originAirport.city      = "New York";
-    airline1.originAirport.annualPassengers = 75000000.0;
+    airline1.airlinePtr->originAirport.code      = "JFK";
+    airline1.airlinePtr->originAirport.city      = "New York";
+    airline1.airlinePtr->originAirport.annualPassengers = 75000000.0;
 
-    airline1.destinationAirport.code = "LAX";
-    airline1.destinationAirport.city = "Los Angeles";
-    airline1.destinationAirport.annualPassengers = 88900000.0;
+    airline1.airlinePtr->destinationAirport.code = "LAX";
+    airline1.airlinePtr->destinationAirport.city = "Los Angeles";
+    airline1.airlinePtr->destinationAirport.annualPassengers = 88900000.0;
 
-    airline1.scheduleRoute("JFK", "LAX");
-    airline1.showAirlineInfo();
+    airline1.airlinePtr->scheduleRoute("JFK", "LAX");
+    airline1.airlinePtr->showAirlineInfo();
 
     std::cout << "\n********************************\nExample 12. `Airport` Instance #2\n********************************\n" ;
 
-    Airline airline2;
+    AirlineWrapper airline2( new Airline() );
 
-    airline2.mainFlight.flightNumber = "DL220";
-    airline2.mainFlight.airline      = "Delta Air Lines";
+    airline2.airlinePtr->mainFlight.flightNumber = "DL220";
+    airline2.airlinePtr->mainFlight.airline      = "Delta Air Lines";
 
-    airline2.mainFlight.boardPassenger(5);
+    airline2.airlinePtr->mainFlight.boardPassenger(5);
 
-    airline2.originAirport.code      = "ATL";
-    airline2.originAirport.city      = "Atlanta";
-    airline2.originAirport.annualPassengers = 5670000.0;
+    airline2.airlinePtr->originAirport.code      = "ATL";
+    airline2.airlinePtr->originAirport.city      = "Atlanta";
+    airline2.airlinePtr->originAirport.annualPassengers = 5670000.0;
 
-    airline2.destinationAirport.code = "SFO";
-    airline2.destinationAirport.city = "San Francisco";
-    airline2.destinationAirport.annualPassengers = 10348000.0;
+    airline2.airlinePtr->destinationAirport.code = "SFO";
+    airline2.airlinePtr->destinationAirport.city = "San Francisco";
+    airline2.airlinePtr->destinationAirport.annualPassengers = 10348000.0;
 
-    airline2.scheduleRoute("ATL", "SFO");
-    airline2.showAirlineInfo();
+    airline2.airlinePtr->scheduleRoute("ATL", "SFO");
+    airline2.airlinePtr->showAirlineInfo();
 
     std::cout << "\n=================================== Finished testing UDT4: `Airline` ===================================\n";
 
@@ -867,69 +920,69 @@ int main()
 
     std::cout << "\n********************************\nExample 13. `Airport` Instance #1\n********************************\n" ;
 
-    Traveler traveler1;
+    TravelerWrapper traveler1( new Traveler() );
 
-    traveler1.favoriteBook.title  = "The 7 Habits of Highly Effective People";
-    traveler1.favoriteBook.author = "Stephen R. Covey";
+    traveler1.travelerPtr->favoriteBook.title  = "The 7 Habits of Highly Effective People";
+    traveler1.travelerPtr->favoriteBook.author = "Stephen R. Covey";
 
-    traveler1.bookedFlight.flightNumber = "AA101";
-    traveler1.bookedFlight.airline      = "American Airlines";
-    traveler1.bookedFlight.origin       = "NY";
-    traveler1.bookedFlight.destination  = "LA";
+    traveler1.travelerPtr->bookedFlight.flightNumber = "AA101";
+    traveler1.travelerPtr->bookedFlight.airline      = "American Airlines";
+    traveler1.travelerPtr->bookedFlight.origin       = "NY";
+    traveler1.travelerPtr->bookedFlight.destination  = "LA";
 
-    traveler1.departureAirport.code     = "JFK";
-    traveler1.departureAirport.city     = "New York";
-    traveler1.departureAirport.annualPassengers = 20678970.0;
+    traveler1.travelerPtr->departureAirport.code     = "JFK";
+    traveler1.travelerPtr->departureAirport.city     = "New York";
+    traveler1.travelerPtr->departureAirport.annualPassengers = 20678970.0;
 
-    traveler1.arrivalAirport.code       = "LAX";
-    traveler1.arrivalAirport.city       = "Los Angeles";
-    traveler1.arrivalAirport.annualPassengers = 10678000.0;
+    traveler1.travelerPtr->arrivalAirport.code       = "LAX";
+    traveler1.travelerPtr->arrivalAirport.city       = "Los Angeles";
+    traveler1.travelerPtr->arrivalAirport.annualPassengers = 10678000.0;
 
-    traveler1.checkInAndshowItinerary("Chuck Norris", "HWC176545");
-    traveler1.finishChapter('A', true);
+    traveler1.travelerPtr->checkInAndshowItinerary("Chuck Norris", "HWC176545");
+    traveler1.travelerPtr->finishChapter('A', true);
 
     std::cout << "Version `OUTSIDE`\n";
-    std::cout << "Traveler1's favorite book: " << traveler1.favoriteBook.title 
-              << " by " << traveler1.favoriteBook.author << "\n";
-    std::cout << "Traveler1's flight: " << traveler1.bookedFlight.flightNumber 
-              << " (" << traveler1.bookedFlight.airline << ") from " 
-              << traveler1.departureAirport.code << " to " 
-              << traveler1.arrivalAirport.code << "\n\n";
+    std::cout << "Traveler1's favorite book: " << traveler1.travelerPtr->favoriteBook.title 
+              << " by " << traveler1.travelerPtr->favoriteBook.author << "\n";
+    std::cout << "Traveler1's flight: " << traveler1.travelerPtr->bookedFlight.flightNumber 
+              << " (" << traveler1.travelerPtr->bookedFlight.airline << ") from " 
+              << traveler1.travelerPtr->departureAirport.code << " to " 
+              << traveler1.travelerPtr->arrivalAirport.code << "\n\n";
 
-    traveler1.printDetailedMemberInfo();
+    traveler1.travelerPtr->printDetailedMemberInfo();
 
 
     std::cout << "\n********************************\nExample 14. `Airport` Instance #2\n********************************\n" ;
 
-    Traveler traveler2;
+    TravelerWrapper traveler2( new Traveler() );
 
-    traveler2.favoriteBook.title  = "Sapiens: A Brief History of Humankind";
-    traveler2.favoriteBook.author = "Yuval Noah Harari";
+    traveler2.travelerPtr->favoriteBook.title  = "Sapiens: A Brief History of Humankind";
+    traveler2.travelerPtr->favoriteBook.author = "Yuval Noah Harari";
 
-    traveler2.bookedFlight.flightNumber = "DL220";
-    traveler2.bookedFlight.airline      = "Delta Air Lines";
-    traveler2.bookedFlight.origin       = "ATL";
-    traveler2.bookedFlight.destination  = "SF";
+    traveler2.travelerPtr->bookedFlight.flightNumber = "DL220";
+    traveler2.travelerPtr->bookedFlight.airline      = "Delta Air Lines";
+    traveler2.travelerPtr->bookedFlight.origin       = "ATL";
+    traveler2.travelerPtr->bookedFlight.destination  = "SF";
 
-    traveler2.departureAirport.code     = "ATL";
-    traveler2.departureAirport.city     = "Atlanta";
-    traveler2.departureAirport.annualPassengers = 234232.0;
+    traveler2.travelerPtr->departureAirport.code     = "ATL";
+    traveler2.travelerPtr->departureAirport.city     = "Atlanta";
+    traveler2.travelerPtr->departureAirport.annualPassengers = 234232.0;
 
-    traveler2.arrivalAirport.code       = "SFO";
-    traveler2.arrivalAirport.city       = "San Francisco";
-    traveler2.arrivalAirport.annualPassengers = 534232.0;
+    traveler2.travelerPtr->arrivalAirport.code       = "SFO";
+    traveler2.travelerPtr->arrivalAirport.city       = "San Francisco";
+    traveler2.travelerPtr->arrivalAirport.annualPassengers = 534232.0;
 
-    traveler2.checkInAndshowItinerary("Dua Lee", "BOB98765");
-    traveler2.finishChapter('B', true);
+    traveler2.travelerPtr->checkInAndshowItinerary("Dua Lee", "BOB98765");
+    traveler2.travelerPtr->finishChapter('B', true);
 
-    std::cout << "Traveler2's favorite book: " << traveler2.favoriteBook.title 
-              << " by " << traveler2.favoriteBook.author << "\n";
-    std::cout << "Traveler2's flight: " << traveler2.bookedFlight.flightNumber 
-              << " (" << traveler2.bookedFlight.airline << ") from " 
-              << traveler2.departureAirport.code << " to " 
-              << traveler2.arrivalAirport.code << "\n\n";
+    std::cout << "Traveler2's favorite book: " << traveler2.travelerPtr->favoriteBook.title 
+              << " by " << traveler2.travelerPtr->favoriteBook.author << "\n";
+    std::cout << "Traveler2's flight: " << traveler2.travelerPtr->bookedFlight.flightNumber 
+              << " (" << traveler2.travelerPtr->bookedFlight.airline << ") from " 
+              << traveler2.travelerPtr->departureAirport.code << " to " 
+              << traveler2.travelerPtr->arrivalAirport.code << "\n\n";
 
-    traveler2.printDetailedMemberInfo();
+    traveler2.travelerPtr->printDetailedMemberInfo();
 
     std::cout << "\n=================================== Finished testing UDT5: `Traveler` ===================================\n";
 
