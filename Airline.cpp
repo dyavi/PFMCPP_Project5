@@ -43,12 +43,3 @@ void Airline::showAirlineInfo() const
     destinationAirport.showAirportInfo();
     std::cout << "===========================\n";
 }
-
-// AirlineWrapper class definition per instruction #4 of project 5 part 3.
-struct AirlineWrapper
-{
-    AirlineWrapper(Airline* _airline) : airlinePtr(_airline) { }
-    ~AirlineWrapper() { delete airlinePtr; }
-    Airline* airlinePtr = nullptr;
-};
-
